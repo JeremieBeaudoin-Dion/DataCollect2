@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
                     });
 
                 }
-            }.start();
+            };
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -190,22 +190,6 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
 
     private void startRecording() {
-
-        handler = new Handler();
-
-        runnable = new Runnable() {
-            @Override
-            public void run(){
-                start4real();
-            }
-        };
-
-        int numberOfSeconds = random.nextInt(3);
-        handler.postDelayed(runnable, (numberOfSeconds + 3) * 1000);
-        start4real();
-    }
-
-    protected void start4real() {
         mp.start();
 
         // output directory for text files
@@ -235,7 +219,6 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         });
         showToast("Recording starts!");
     }
-
 
     protected void stopRecording() {
         mHandler.post(new Runnable() {
@@ -426,6 +409,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
             @Override
             public void run() {
                 displayIMUSensorMeasurements();
+                mHandler.removeCallbacksAndMessages(null);
             }
         }, displayInterval);
     }

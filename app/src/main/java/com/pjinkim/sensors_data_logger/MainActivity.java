@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.util.Log;
@@ -125,18 +126,43 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     public void startStopRecording(View view) {
         if (!mIsRecording.get()) {
 
-            // start recording sensor measurements when button is pressed
-            startRecording();
+            final CountDownTimer countDownTimer = new CountDownTimer(5000, 1000) {
 
-            // start interface timer on display
-            mSecondCounter = 0;
-            mInterfaceTimer.schedule(new TimerTask() {
+                public void onTick(long millisUntilFinished) {
+                    mStartStopButton.setText("Starting in: " + millisUntilFinished / 1000);
+                }
+
+                public void onFinish() {
+                    // mStartStopButton.setText("done!");
+                    // start recording sensor measurements when button is pressed
+                    startRecording();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // start interface timer on display
+                            mSecondCounter = 0;
+                            mInterfaceTimer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    mSecondCounter += 1;
+                                    mLabelInterfaceTime.setText(interfaceIntTime(mSecondCounter));
+                                }
+                            }, 0, 1000);
+                        }
+                    });
+
+                }
+            }.start();
+
+            runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mSecondCounter += 1;
-                    mLabelInterfaceTime.setText(interfaceIntTime(mSecondCounter));
+                    countDownTimer.start();
                 }
-            }, 0, 1000);
+            });
+
+
 
         } else {
 
@@ -151,7 +177,6 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
 
     private void startRecording() {
-
         // output directory for text files
         String outputFolder = null;
         try {

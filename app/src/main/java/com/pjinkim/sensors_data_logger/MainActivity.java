@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -20,6 +21,7 @@ import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -64,6 +66,12 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     private Timer mInterfaceTimer = new Timer();
     private int mSecondCounter = 0;
 
+    private MediaPlayer mp;
+
+    private Handler handler;
+    private Random random;
+    private Runnable runnable;
+
 
     // Android activity lifecycle states
     @Override
@@ -74,6 +82,11 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         // initialize screen labels and buttons
         initializeViews();
 
+        // creating media player
+        mp = MediaPlayer.create(this, R.raw.ding);
+
+        // create handler for time wait
+        random = new Random();
 
         // setup sessions
         mIMUSession = new IMUSession(this);
@@ -177,6 +190,24 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
 
     private void startRecording() {
+
+        handler = new Handler();
+
+        runnable = new Runnable() {
+            @Override
+            public void run(){
+                start4real();
+            }
+        };
+
+        int numberOfSeconds = random.nextInt(3);
+        handler.postDelayed(runnable, (numberOfSeconds + 3) * 1000);
+        start4real();
+    }
+
+    protected void start4real() {
+        mp.start();
+
         // output directory for text files
         String outputFolder = null;
         try {

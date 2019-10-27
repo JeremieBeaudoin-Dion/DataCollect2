@@ -13,6 +13,7 @@ import android.os.PowerManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
     private Button mStartStopButton;
     private TextView mLabelInterfaceTime;
+    private EditText mUserIdentifier;
     private Timer mInterfaceTimer = new Timer();
     private int mSecondCounter = 0;
 
@@ -191,7 +193,8 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
     private void startRecording() {
         mp.start();
-
+        String userName = mUserIdentifier.getText().toString();
+        mConfig.setFolderSuffix(userName);
         // output directory for text files
         String outputFolder = null;
         try {
@@ -358,6 +361,7 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
         mStartStopButton = (Button) findViewById(R.id.button_start_stop);
         mLabelInterfaceTime = (TextView) findViewById(R.id.label_interface_time);
+        mUserIdentifier = (EditText) findViewById(R.id.user_identifier);
     }
 
 

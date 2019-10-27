@@ -5,6 +5,7 @@ public class IMUConfig implements java.io.Serializable {
     // properties
     private Boolean mIsFileEnabled = true;
     private String mFolderPrefix = "";
+    private String mFolderSuffix = "";
 
     private Boolean mIsWifiEnabled = true;
     private int mWifiScanInterval = 1;
@@ -71,7 +72,9 @@ public class IMUConfig implements java.io.Serializable {
         this.mReferenceTimestamp = v;
     }
 
+    public void setFolderSuffix(String v){ this.mFolderSuffix = ("_" + v); }
+
     public String getSuffix() {
-        return "R_pjinkim";
+        return mFolderSuffix;
     }
 }

@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
+import com.chaquo.python.android.AndroidPlatform;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -100,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         mWifiSession = new WifiSession(this);
         mBatterySession = new BatterySession(this);
 
-
         // battery power setting
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "sensors_data_logger:wakelocktag");
@@ -110,9 +110,6 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         // monitor various sensor measurements
         displayIMUSensorMeasurements();
         mLabelInterfaceTime.setText(R.string.ready_title);
-
-        // Chaquopy : create python
-        py = Python.getInstance();
     }
 
 
@@ -123,6 +120,14 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
             requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_ANDROID);
         }
         updateConfig();
+
+        // Chaquopy: Starts python
+        if (! Python.isStarted()) {
+            Python.start(new AndroidPlatform(this));
+            py = Python.getInstance();
+        } else {
+            py = Python.getInstance();
+        }
     }
 
 

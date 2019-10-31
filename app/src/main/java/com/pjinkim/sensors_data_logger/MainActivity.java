@@ -32,7 +32,7 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
-public class MainActivity extends AppCompatActivity implements WifiSession.WifiScannerCallback {
+public class MainActivity extends AppCompatActivity {
 
     // properties
     private final static String LOG_TAG = MainActivity.class.getName();
@@ -157,10 +157,13 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         if (!mIsRecording.get()) {
 
             // Get hello.py as test object -- calling
-            PyObject testObj = py.getModule("hello.Test").callAttr("returnFive");
-            int value = testObj.get("value").toInt();
+            PyObject helloModule = py.getModule("hello");
+            PyObject testObject = helloModule.callAttr("Test");
 
-            final CountDownTimer countDownTimer = new CountDownTimer(value *1000, 1000) {
+            int value = testObject.get("value").toInt();
+            int value2 = testObject.callAttr("returnFive").toInt();
+
+            final CountDownTimer countDownTimer = new CountDownTimer(value * 1000, 1000) {
 
                 public void onTick(long millisUntilFinished) {
                     mStartStopButton.setText("Starting in: " + millisUntilFinished / 1000);
@@ -438,7 +441,6 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     }
 
 
-    @Override
     public void displayWifiScanMeasurements(final int currentApNums, final float currentScanInterval, final String nameSSID, final int RSSI) {
         runOnUiThread(new Runnable() {
             @Override

@@ -17,6 +17,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.chaquo.python.PyObject;
+import com.chaquo.python.Python;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -74,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
     private Random random;
     private Runnable runnable;
 
+    // For python
+    private Python py;
 
     // Android activity lifecycle states
     @Override
@@ -105,6 +110,9 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
         // monitor various sensor measurements
         displayIMUSensorMeasurements();
         mLabelInterfaceTime.setText(R.string.ready_title);
+
+        // Chaquopy : create python
+        py = Python.getInstance();
     }
 
 
@@ -139,9 +147,15 @@ public class MainActivity extends AppCompatActivity implements WifiSession.WifiS
 
     // methods
     public void startStopRecording(View view) {
+
+
         if (!mIsRecording.get()) {
 
-            final CountDownTimer countDownTimer = new CountDownTimer(5000, 1000) {
+            // Get hello.py as test object -- calling
+            PyObject testObj = py.getModule("hello.Test").callAttr("returnFive");
+            int value = testObj.get("value").toInt();
+
+            final CountDownTimer countDownTimer = new CountDownTimer(value *1000, 1000) {
 
                 public void onTick(long millisUntilFinished) {
                     mStartStopButton.setText("Starting in: " + millisUntilFinished / 1000);

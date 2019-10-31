@@ -18,6 +18,7 @@ android {
             pip {
                 install "six==1.10.0"
                 install "scipy==1.0.1"
+
             }
         }
     }

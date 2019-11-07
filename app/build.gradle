@@ -17,6 +17,7 @@ android {
         python {
             pip {
                 install "scipy==1.0.1"
+                install "scikit-learn==0.21.2"
             }
         }
     }

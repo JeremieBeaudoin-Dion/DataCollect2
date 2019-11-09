@@ -1,9 +1,13 @@
 package com.pjinkim.sensors_data_logger;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -32,7 +36,7 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     // properties
     private final static String LOG_TAG = MainActivity.class.getName();
@@ -68,6 +72,10 @@ public class MainActivity extends AppCompatActivity {
     // For python
     private Python py;
 
+    //For device enabled lockscreen
+    private DevicePolicyManager mgr = null;
+    private ComponentName cn= null;
+
     // Android activity lifecycle states
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +102,10 @@ public class MainActivity extends AppCompatActivity {
 
         // monitor various sensor measurements
         mLabelInterfaceTime.setText(R.string.ready_title);
+
+        //Set DevicePolicyManager
+        cn = new ComponentName(this, AdminReceiver.class);
+        mgr = (DevicePolicyManager)getSystemService(DEVICE_POLICY_SERVICE);
     }
 
 
@@ -136,65 +148,76 @@ public class MainActivity extends AppCompatActivity {
 
     // methods
     public void startStopRecording(View view) {
+        //This if branch checks if the policy manager is active.
+        if(mgr.isAdminActive(cn)) {
+
+            if (!mIsRecording.get()) {
+
+                // Get hello.py as test object -- calling
+                PyObject helloModule = py.getModule("hello");
+                PyObject testObject = helloModule.callAttr("Test");
+
+                int value = testObject.get("value").toInt();
+                int value2 = testObject.callAttr("returnFive").toInt();
+
+                final CountDownTimer countDownTimer = new CountDownTimer(value * 1000, 1000) {
+
+                    public void onTick(long millisUntilFinished) {
+                        mStartStopButton.setText("Starting in: " + millisUntilFinished / 1000);
+                        mgr.lockNow();
+                    }
+
+                    public void onFinish() {
+                        // mStartStopButton.setText("done!");
+                        // start recording sensor measurements when button is pressed
+                        startRecording();
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // start interface timer on display
+                                mSecondCounter = 0;
+                                mInterfaceTimer.schedule(new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        mSecondCounter += 1;
+                                        mLabelInterfaceTime.setText(interfaceIntTime(mSecondCounter));
+                                    }
+                                }, 0, 1000);
+                            }
+                        });
+
+                    }
+                };
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        countDownTimer.start();
+                    }
+                });
 
 
-        if (!mIsRecording.get()) {
+            } else {
 
-            // Get hello.py as test object -- calling
-            PyObject helloModule = py.getModule("hello");
-            PyObject testObject = helloModule.callAttr("Test");
+                // stop recording sensor measurements when button is pressed
+                stopRecording();
 
-            int value = testObject.get("value").toInt();
-            int value2 = testObject.callAttr("returnFive").toInt();
-
-            final CountDownTimer countDownTimer = new CountDownTimer(value * 1000, 1000) {
-
-                public void onTick(long millisUntilFinished) {
-                    mStartStopButton.setText("Starting in: " + millisUntilFinished / 1000);
-                }
-
-                public void onFinish() {
-                    // mStartStopButton.setText("done!");
-                    // start recording sensor measurements when button is pressed
-                    startRecording();
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // start interface timer on display
-                            mSecondCounter = 0;
-                            mInterfaceTimer.schedule(new TimerTask() {
-                                @Override
-                                public void run() {
-                                    mSecondCounter += 1;
-                                    mLabelInterfaceTime.setText(interfaceIntTime(mSecondCounter));
-                                }
-                            }, 0, 1000);
-                        }
-                    });
-
-                }
-            };
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    countDownTimer.start();
-                }
-            });
-
-
-
+                // stop interface timer on display
+                mInterfaceTimer.cancel();
+                mLabelInterfaceTime.setText(R.string.ready_title);
+            }
+            //if device manager isn't active, it will show a prompt to the user explaining what
+            //it is and what its used for.
         } else {
-
-            // stop recording sensor measurements when button is pressed
-            stopRecording();
-
-            // stop interface timer on display
-            mInterfaceTimer.cancel();
-            mLabelInterfaceTime.setText(R.string.ready_title);
+                Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+                intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, cn);
+                intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                        getString(R.string.permission_explanation));
+                startActivity(intent);
         }
     }
+
 
 
     private void startRecording() {
@@ -224,7 +247,6 @@ public class MainActivity extends AppCompatActivity {
                 mStartStopButton.setText(R.string.stop_title);
             }
         });
-        showToast("Recording starts!");
     }
 
     protected void stopRecording() {

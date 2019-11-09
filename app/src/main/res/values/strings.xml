@@ -7,4 +7,5 @@
     <string name="detach_title">Detach</string>
     <string name="stop_title">Stop</string>
     <string name="write_file">File</string>
+    <string name="permission_explanation">Lets the application lock the screen for testing purposes.</string>
 </resources>

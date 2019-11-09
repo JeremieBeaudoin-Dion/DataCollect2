@@ -42,7 +42,7 @@ public class FileStreamer {
 
         // get current time information
         Calendar fileTimestamp = Calendar.getInstance();
-        String timeHeader = "# Created at " + fileTimestamp.getTime().toString() + " in Burnaby Canada \n";
+        String timeHeader = "# Created at " + fileTimestamp.getTime().toString() + "\n";
 
         // generate text file
         BufferedWriter newWriter = createFile(mOutputFolder + "/" + fileName, timeHeader);

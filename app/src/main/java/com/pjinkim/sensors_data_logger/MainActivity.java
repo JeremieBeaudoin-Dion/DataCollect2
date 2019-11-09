@@ -62,6 +62,12 @@ public class MainActivity extends Activity {
     private EditText mUserIdentifier;
     private Timer mInterfaceTimer;
     private int mSecondCounter = 0;
+    //Keeps track if its the same subject being tested
+    //Simplifies data collection process by saving us the time of constantly updating the user field
+    //For a single user. For example: While testing for ARIEL, it would be tedious to
+    //Constantly be updating the field to ARIEL1, ARIEL2, ARIEL3, etc...
+    private int mSessionCounter;
+    private String mCurrentSubject;
 
     private MediaPlayer mp;
 
@@ -225,6 +231,16 @@ public class MainActivity extends Activity {
     private void startRecording() {
         mp.start();
         String userName = mUserIdentifier.getText().toString();
+        if (mCurrentSubject != null){
+            if (mCurrentSubject.equals(userName)){
+                mSessionCounter += 1;
+            } else {
+                mSessionCounter = 0;
+            }
+        } else {
+            mCurrentSubject = userName;
+        }
+        userName = userName + mSessionCounter;
         mConfig.setFolderSuffix(userName);
         // output directory for text files
         String outputFolder = null;

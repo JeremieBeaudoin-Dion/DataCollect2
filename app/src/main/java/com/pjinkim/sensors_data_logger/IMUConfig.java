@@ -7,8 +7,6 @@ public class IMUConfig implements java.io.Serializable {
     private String mFolderPrefix = "";
     private String mFolderSuffix = "";
 
-    private Boolean mIsWifiEnabled = true;
-    private int mWifiScanInterval = 1;
 
     private int mStartDelay = 0;
     private long mReferenceTimestamp = 0;
@@ -18,14 +16,6 @@ public class IMUConfig implements java.io.Serializable {
     // getter and setter
     public Boolean getFileEnabled() {
         return this.mIsFileEnabled;
-    }
-
-    public Boolean getWifiEnabled() {
-        return this.mIsWifiEnabled;
-    }
-
-    public int getWifiScanInterval() {
-        return this.mWifiScanInterval;
     }
 
     public int getStartDelay() {
@@ -52,14 +42,6 @@ public class IMUConfig implements java.io.Serializable {
         this.mIsFileEnabled = v;
     }
 
-    public void setWifiEnabled(Boolean v) {
-        this.mIsWifiEnabled = v;
-    }
-
-    public void setWifiScanInterval(int v) {
-        this.mWifiScanInterval = v;
-    }
-
     public void setStartDelay(int v) {
         this.mStartDelay = v;
     }
@@ -72,7 +54,9 @@ public class IMUConfig implements java.io.Serializable {
         this.mReferenceTimestamp = v;
     }
 
-    public void setFolderSuffix(String v){ this.mFolderSuffix = ("_" + v); }
+    //Add _ separator like before when activites and output name is decided.
+    // It was in the format "_" + variable
+    public void setFolderSuffix(String v){ this.mFolderSuffix = (v); }
 
     public String getSuffix() {
         return mFolderSuffix;

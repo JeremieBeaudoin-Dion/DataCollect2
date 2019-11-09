@@ -32,12 +32,14 @@ public class OutputDirectoryManager {
 
     // methods
     private void update(final String prefix, final String suffix) throws FileNotFoundException {
-
+        //Commented out to force the creation of directories that contain only our subject's name.
+        //TO BE POLISHED ONCE THE ACTIVITES AND PREPROCESSING FORMAT IS FINALIZED.
         // initialize folder name with current time information
-        Calendar currentTime = Calendar.getInstance();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddhhmmss");
+        //Calendar currentTime = Calendar.getInstance();
+        //SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddhhmmss");
         File externalDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        String folderName = formatter.format(currentTime.getTime());
+        //String folderName = formatter.format(currentTime.getTime());
+        String folderName = "";
 
         // combine prefix and suffix
         if (prefix != null) {

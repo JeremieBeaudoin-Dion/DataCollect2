@@ -49,22 +49,12 @@ public class MainActivity extends AppCompatActivity {
 
     private IMUConfig mConfig = new IMUConfig();
     private IMUSession mIMUSession;
-    private WifiSession mWifiSession;
     private BatterySession mBatterySession;
 
     private Handler mHandler = new Handler();
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
     private PowerManager.WakeLock mWakeLock;
 
-    private TextView mLabelAccelDataX, mLabelAccelDataY, mLabelAccelDataZ;
-    private TextView mLabelAccelBiasX, mLabelAccelBiasY, mLabelAccelBiasZ;
-    private TextView mLabelGyroDataX, mLabelGyroDataY, mLabelGyroDataZ;
-    private TextView mLabelGyroBiasX, mLabelGyroBiasY, mLabelGyroBiasZ;
-    private TextView mLabelMagnetDataX, mLabelMagnetDataY, mLabelMagnetDataZ;
-    private TextView mLabelMagnetBiasX, mLabelMagnetBiasY, mLabelMagnetBiasZ;
-
-    private TextView mLabelWifiAPNums, mLabelWifiScanInterval;
-    private TextView mLabelWifiNameSSID, mLabelWifiRSSI;
 
     private Button mStartStopButton;
     private TextView mLabelInterfaceTime;
@@ -98,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
 
         // setup sessions
         mIMUSession = new IMUSession(this);
-        mWifiSession = new WifiSession(this);
         mBatterySession = new BatterySession(this);
 
         // battery power setting
@@ -108,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         // monitor various sensor measurements
-        displayIMUSensorMeasurements();
         mLabelInterfaceTime.setText(R.string.ready_title);
     }
 
@@ -230,7 +218,6 @@ public class MainActivity extends AppCompatActivity {
 
         // start each session
         mIMUSession.startSession(outputFolder);
-        mWifiSession.startSession(outputFolder);
         mBatterySession.startSession(outputFolder);
         mIsRecording.set(true);
 
@@ -252,7 +239,6 @@ public class MainActivity extends AppCompatActivity {
 
                 // stop each session
                 mIMUSession.stopSession();
-                mWifiSession.stopSession();
                 mBatterySession.stopSession();
                 mIsRecording.set(false);
 
@@ -315,10 +301,6 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 mStartStopButton.setEnabled(true);
                 mStartStopButton.setText(R.string.start_title);
-                mLabelWifiAPNums.setText("N/A");
-                mLabelWifiScanInterval.setText("0");
-                mLabelWifiNameSSID.setText("N/A");
-                mLabelWifiRSSI.setText("N/A");
             }
         });
     }
@@ -352,105 +334,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeViews() {
 
-        mLabelAccelDataX = (TextView) findViewById(R.id.label_accel_X);
-        mLabelAccelDataY = (TextView) findViewById(R.id.label_accel_Y);
-        mLabelAccelDataZ = (TextView) findViewById(R.id.label_accel_Z);
-
-        mLabelAccelBiasX = (TextView) findViewById(R.id.label_accel_bias_X);
-        mLabelAccelBiasY = (TextView) findViewById(R.id.label_accel_bias_Y);
-        mLabelAccelBiasZ = (TextView) findViewById(R.id.label_accel_bias_Z);
-
-        mLabelGyroDataX = (TextView) findViewById(R.id.label_gyro_X);
-        mLabelGyroDataY = (TextView) findViewById(R.id.label_gyro_Y);
-        mLabelGyroDataZ = (TextView) findViewById(R.id.label_gyro_Z);
-
-        mLabelGyroBiasX = (TextView) findViewById(R.id.label_gyro_bias_X);
-        mLabelGyroBiasY = (TextView) findViewById(R.id.label_gyro_bias_Y);
-        mLabelGyroBiasZ = (TextView) findViewById(R.id.label_gyro_bias_Z);
-
-        mLabelMagnetDataX = (TextView) findViewById(R.id.label_magnet_X);
-        mLabelMagnetDataY = (TextView) findViewById(R.id.label_magnet_Y);
-        mLabelMagnetDataZ = (TextView) findViewById(R.id.label_magnet_Z);
-
-        mLabelMagnetBiasX = (TextView) findViewById(R.id.label_magnet_bias_X);
-        mLabelMagnetBiasY = (TextView) findViewById(R.id.label_magnet_bias_Y);
-        mLabelMagnetBiasZ = (TextView) findViewById(R.id.label_magnet_bias_Z);
-
-        mLabelWifiAPNums = (TextView) findViewById(R.id.label_wifi_number_ap);
-        mLabelWifiScanInterval = (TextView) findViewById(R.id.label_wifi_scan_interval);
-        mLabelWifiNameSSID = (TextView) findViewById(R.id.label_wifi_SSID_name);
-        mLabelWifiRSSI = (TextView) findViewById(R.id.label_wifi_RSSI);
 
         mStartStopButton = (Button) findViewById(R.id.button_start_stop);
         mLabelInterfaceTime = (TextView) findViewById(R.id.label_interface_time);
         mUserIdentifier = (EditText) findViewById(R.id.user_identifier);
-    }
-
-
-    private void displayIMUSensorMeasurements() {
-
-        // get IMU sensor measurements from IMUSession
-        final float[] acce_data = mIMUSession.getAcceMeasure();
-        final float[] acce_bias = mIMUSession.getAcceBias();
-
-        final float[] gyro_data = mIMUSession.getGyroMeasure();
-        final float[] gyro_bias = mIMUSession.getGyroBias();
-
-        final float[] magnet_data = mIMUSession.getMagnetMeasure();
-        final float[] magnet_bias = mIMUSession.getMagnetBias();
-
-        // update current screen (activity)
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mLabelAccelDataX.setText(String.format(Locale.US, "%.3f", acce_data[0]));
-                mLabelAccelDataY.setText(String.format(Locale.US, "%.3f", acce_data[1]));
-                mLabelAccelDataZ.setText(String.format(Locale.US, "%.3f", acce_data[2]));
-
-                mLabelAccelBiasX.setText(String.format(Locale.US, "%.3f", acce_bias[0]));
-                mLabelAccelBiasY.setText(String.format(Locale.US, "%.3f", acce_bias[1]));
-                mLabelAccelBiasZ.setText(String.format(Locale.US, "%.3f", acce_bias[2]));
-
-                mLabelGyroDataX.setText(String.format(Locale.US, "%.3f", gyro_data[0]));
-                mLabelGyroDataY.setText(String.format(Locale.US, "%.3f", gyro_data[1]));
-                mLabelGyroDataZ.setText(String.format(Locale.US, "%.3f", gyro_data[2]));
-
-                mLabelGyroBiasX.setText(String.format(Locale.US, "%.3f", gyro_bias[0]));
-                mLabelGyroBiasY.setText(String.format(Locale.US, "%.3f", gyro_bias[1]));
-                mLabelGyroBiasZ.setText(String.format(Locale.US, "%.3f", gyro_bias[2]));
-
-                mLabelMagnetDataX.setText(String.format(Locale.US, "%.3f", magnet_data[0]));
-                mLabelMagnetDataY.setText(String.format(Locale.US, "%.3f", magnet_data[1]));
-                mLabelMagnetDataZ.setText(String.format(Locale.US, "%.3f", magnet_data[2]));
-
-                mLabelMagnetBiasX.setText(String.format(Locale.US, "%.3f", magnet_bias[0]));
-                mLabelMagnetBiasY.setText(String.format(Locale.US, "%.3f", magnet_bias[1]));
-                mLabelMagnetBiasZ.setText(String.format(Locale.US, "%.3f", magnet_bias[2]));
-            }
-        });
-
-        // determine display update rate (100 ms)
-        final long displayInterval = 100;
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                displayIMUSensorMeasurements();
-                mHandler.removeCallbacksAndMessages(null);
-            }
-        }, displayInterval);
-    }
-
-
-    public void displayWifiScanMeasurements(final int currentApNums, final float currentScanInterval, final String nameSSID, final int RSSI) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mLabelWifiAPNums.setText(String.valueOf(currentApNums));
-                mLabelWifiScanInterval.setText(String.format(Locale.US, "%.1f", currentScanInterval));
-                mLabelWifiNameSSID.setText(String.valueOf(nameSSID));
-                mLabelWifiRSSI.setText(String.valueOf(RSSI));
-            }
-        });
     }
 
 

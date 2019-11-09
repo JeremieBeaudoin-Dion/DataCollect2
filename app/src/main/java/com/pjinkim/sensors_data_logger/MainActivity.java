@@ -41,15 +41,12 @@ public class MainActivity extends AppCompatActivity {
     private static String[] REQUIRED_PERMISSIONS = new String[] {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.ACCESS_WIFI_STATE,
-            Manifest.permission.CHANGE_WIFI_STATE,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION
     };
 
     private IMUConfig mConfig = new IMUConfig();
     private IMUSession mIMUSession;
-    private BatterySession mBatterySession;
 
     private Handler mHandler = new Handler();
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
@@ -88,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
 
         // setup sessions
         mIMUSession = new IMUSession(this);
-        mBatterySession = new BatterySession(this);
 
         // battery power setting
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -218,7 +214,6 @@ public class MainActivity extends AppCompatActivity {
 
         // start each session
         mIMUSession.startSession(outputFolder);
-        mBatterySession.startSession(outputFolder);
         mIsRecording.set(true);
 
         // update Start/Stop button UI
@@ -239,7 +234,6 @@ public class MainActivity extends AppCompatActivity {
 
                 // stop each session
                 mIMUSession.stopSession();
-                mBatterySession.stopSession();
                 mIsRecording.set(false);
 
                 // update screen UI and button

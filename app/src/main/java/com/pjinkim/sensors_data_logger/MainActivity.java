@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
     private Button mStartStopButton;
     private TextView mLabelInterfaceTime;
     private EditText mUserIdentifier;
-    private Timer mInterfaceTimer = new Timer();
+    private Timer mInterfaceTimer;
     private int mSecondCounter = 0;
 
     private MediaPlayer mp;
@@ -176,6 +176,8 @@ public class MainActivity extends Activity {
                             @Override
                             public void run() {
                                 // start interface timer on display
+
+                                mInterfaceTimer = new Timer();
                                 mSecondCounter = 0;
                                 mInterfaceTimer.schedule(new TimerTask() {
                                     @Override

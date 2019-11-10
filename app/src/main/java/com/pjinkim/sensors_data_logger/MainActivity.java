@@ -3,6 +3,10 @@ package com.pjinkim.sensors_data_logger;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -10,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -26,6 +31,8 @@ import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
@@ -62,6 +69,7 @@ public class MainActivity extends Activity {
     private EditText mUserIdentifier;
     private Timer mInterfaceTimer;
     private int mSecondCounter = 0;
+
     //Keeps track if its the same subject being tested
     //Simplifies data collection process by saving us the time of constantly updating the user field
     //For a single user. For example: While testing for ARIEL, it would be tedious to
@@ -81,6 +89,10 @@ public class MainActivity extends Activity {
     //For device enabled lockscreen
     private DevicePolicyManager mgr = null;
     private ComponentName cn= null;
+
+    //For Notification
+    private final String CHANNEL_ID = "recording_stop";
+    private final int NOTIFICATION_ID = 001;
 
     // Android activity lifecycle states
     @Override
@@ -256,6 +268,7 @@ public class MainActivity extends Activity {
         // start each session
         mIMUSession.startSession(outputFolder);
         mIsRecording.set(true);
+        displayNotification(mCurrentSubject);
 
         // update Start/Stop button UI
         runOnUiThread(new Runnable() {
@@ -392,4 +405,48 @@ public class MainActivity extends Activity {
         // return interface int time
         return String.format(Locale.US, "%02d:%02d:%02d", hours, mins, secs);
     }
+
+    //Call this to display our notification to our user
+    private void displayNotification(String userName){
+        createNotificationChannel();
+        //The intent will be responsible of allowing the notification
+        //To route us back to the activity and stop the notification from
+        //a single click
+        Intent stoppingIntent = new Intent(this,MainActivity.class);
+        PendingIntent stoppingPendingIntent = PendingIntent.getActivity(this, 0, stoppingIntent, Intent.FILL_IN_ACTION);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this,CHANNEL_ID);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setContentTitle("Hi, " + userName);
+        //Even though our directory naming starts with 0, for subject viewing clarity
+        //the session counter will start at 1 for display purposes only.
+        builder.setContentText("Recording session #" + mSessionCounter + 1);
+        builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+        builder.setAutoCancel(true);
+        builder.setContentIntent(stoppingPendingIntent);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(NOTIFICATION_ID,builder.build());
+    }
+
+    //Need to create a NotificationChannel for devices 8.0 and above.
+    private void createNotificationChannel(){
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+            CharSequence name = "Stop Notification";
+            String description = "Stops the data recording";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,name,importance);
+            notificationChannel.setDescription(description);
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+    }
+
+    //In future implementation when we authenticate user this might need modification but for the
+    //current data collection purposes this fits our criteria
+    protected void onNewIntent(Intent intent){
+        startStopRecording(mStartStopButton);
+    }
+
 }

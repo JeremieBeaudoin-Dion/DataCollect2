@@ -55,15 +55,15 @@ public class IMUSession implements SensorEventListener {
 
         // setup and register various sensors
         mSensors.put("acce", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
-        mSensors.put("acce_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER_UNCALIBRATED));
+        //mSensors.put("acce_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER_UNCALIBRATED));
         mSensors.put("gyro", mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE));
-        mSensors.put("gyro_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED));
+        //mSensors.put("gyro_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED));
         mSensors.put("linacce", mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION));
         mSensors.put("gravity", mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY));
         mSensors.put("magnet", mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
-        mSensors.put("magnet_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED));
+        //mSensors.put("magnet_uncalib", mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED));
         mSensors.put("rv", mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR));
-        mSensors.put("game_rv", mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR));
+        //mSensors.put("game_rv", mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR));
         mSensors.put("magnetic_rv", mSensorManager.getDefaultSensor(Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR));
         mSensors.put("step", mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER));
         mSensors.put("pressure", mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE));
@@ -91,21 +91,21 @@ public class IMUSession implements SensorEventListener {
             mFileStreamer = new FileStreamer(mContext, streamFolder);
             try {
                 mFileStreamer.addFile("acce", "acce.txt");
-                mFileStreamer.addFile("acce_uncalib", "acce_uncalib.txt");
+                //mFileStreamer.addFile("acce_uncalib", "acce_uncalib.txt");
                 mFileStreamer.addFile("gyro", "gyro.txt");
-                mFileStreamer.addFile("gyro_uncalib", "gyro_uncalib.txt");
+                //mFileStreamer.addFile("gyro_uncalib", "gyro_uncalib.txt");
                 mFileStreamer.addFile("linacce", "linacce.txt");
                 mFileStreamer.addFile("gravity", "gravity.txt");
                 mFileStreamer.addFile("magnet", "magnet.txt");
-                mFileStreamer.addFile("magnet_uncalib", "magnet_uncalib.txt");
+                //mFileStreamer.addFile("magnet_uncalib", "magnet_uncalib.txt");
                 mFileStreamer.addFile("rv", "rv.txt");
-                mFileStreamer.addFile("game_rv", "game_rv.txt");
+                //mFileStreamer.addFile("game_rv", "game_rv.txt");
                 mFileStreamer.addFile("magnetic_rv", "magnetic_rv.txt");
                 mFileStreamer.addFile("step", "step.txt");
                 mFileStreamer.addFile("pressure", "pressure.txt");
-                mFileStreamer.addFile("acce_bias", "acce_bias.txt");
-                mFileStreamer.addFile("gyro_bias", "gyro_bias.txt");
-                mFileStreamer.addFile("magnet_bias", "magnet_bias.txt");
+                //mFileStreamer.addFile("acce_bias", "acce_bias.txt");
+                //mFileStreamer.addFile("gyro_bias", "gyro_bias.txt");
+                //mFileStreamer.addFile("magnet_bias", "magnet_bias.txt");
                 mIsWritingFile.set(true);
             } catch (IOException e) {
                 mContext.showToast("Error occurs when creating output IMU files.");

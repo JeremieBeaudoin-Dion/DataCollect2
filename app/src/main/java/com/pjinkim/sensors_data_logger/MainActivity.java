@@ -419,7 +419,7 @@ public class MainActivity extends Activity {
         builder.setContentTitle("Hi, " + userName);
         //Even though our directory naming starts with 0, for subject viewing clarity
         //the session counter will start at 1 for display purposes only.
-        builder.setContentText("Recording session #" + mSessionCounter + 1);
+        builder.setContentText("Recording session #" + (mSessionCounter + 1));
         builder.setPriority(NotificationCompat.PRIORITY_HIGH);
         builder.setAutoCancel(true);
         builder.setContentIntent(stoppingPendingIntent);

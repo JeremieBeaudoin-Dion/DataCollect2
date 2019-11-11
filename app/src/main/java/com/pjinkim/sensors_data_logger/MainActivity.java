@@ -13,7 +13,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -77,7 +76,6 @@ public class MainActivity extends Activity {
     private int mSessionCounter;
     private String mCurrentSubject;
 
-    private MediaPlayer mp;
 
     private Handler handler;
     private Random random;
@@ -93,6 +91,7 @@ public class MainActivity extends Activity {
     //For Notification
     private final String CHANNEL_ID = "recording_stop";
     private final int NOTIFICATION_ID = 001;
+    private boolean isRecording = false;
 
     // Android activity lifecycle states
     @Override
@@ -102,9 +101,6 @@ public class MainActivity extends Activity {
 
         // initialize screen labels and buttons
         initializeViews();
-
-        // creating media player
-        mp = MediaPlayer.create(this, R.raw.ding);
 
         // create handler for time wait
         random = new Random();
@@ -241,7 +237,6 @@ public class MainActivity extends Activity {
 
 
     private void startRecording() {
-        mp.start();
         String userName = mUserIdentifier.getText().toString();
         if (mCurrentSubject != null){
             if (mCurrentSubject.equals(userName)){
@@ -268,6 +263,7 @@ public class MainActivity extends Activity {
         // start each session
         mIMUSession.startSession(outputFolder);
         mIsRecording.set(true);
+        isRecording = true;
         displayNotification(mCurrentSubject);
 
         // update Start/Stop button UI
@@ -288,6 +284,7 @@ public class MainActivity extends Activity {
                 // stop each session
                 mIMUSession.stopSession();
                 mIsRecording.set(false);
+                isRecording = false;
 
                 // update screen UI and button
                 showToast("Recording stops!");
@@ -446,7 +443,9 @@ public class MainActivity extends Activity {
     //In future implementation when we authenticate user this might need modification but for the
     //current data collection purposes this fits our criteria
     protected void onNewIntent(Intent intent){
-        startStopRecording(mStartStopButton);
+        if(isRecording){
+            startStopRecording(mStartStopButton);
+        }
     }
 
 }

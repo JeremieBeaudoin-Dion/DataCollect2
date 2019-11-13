@@ -35,6 +35,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.Timer;
@@ -138,6 +139,12 @@ public class MainActivity extends Activity {
         } else {
             py = Python.getInstance();
         }
+
+        // Test python integration of SVM
+        float[] accell = {0, 0, 0};
+        float[] gyro = {0, 0, 0};
+        float[] magnet = {0, 0, 0};
+        int value = validateUserWithSVM(accell, gyro, magnet);
     }
 
 
@@ -166,13 +173,7 @@ public class MainActivity extends Activity {
         if(mgr.isAdminActive(cn)) {
 
             if (!mIsRecording.get()) {
-
-                // Get hello.py as test object -- calling
-                PyObject helloModule = py.getModule("hello");
-                PyObject testObject = helloModule.callAttr("Test");
-
-                int value = testObject.get("value").toInt();
-                int value2 = testObject.callAttr("returnFive").toInt();
+                int value = 5;
 
                 final CountDownTimer countDownTimer = new CountDownTimer(value * 1000, 1000) {
 
@@ -234,7 +235,23 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Authenticates user from sensors
+     *
+     * input:   float[] array of x, y, z for accellerometer, gyrometer, magnetometer
+     * output:  0 if this is not user
+     *          1 if this is the user
+     */
+    private int validateUserWithSVM(float[] accell, float[] gyro, float[] magnet) {
+        // Get hello.py as test object -- calling
+        PyObject helloModule = py.getModule("hello");
+        PyObject svmObject = helloModule.callAttr("SVM");
 
+        // int isUser = svmObject.callAttr("returnFive").toInt();
+        int isUser = svmObject.callAttr("validate_user", accell, gyro, magnet).toInt();
+
+        return isUser;
+    }
 
     private void startRecording() {
         String userName = mUserIdentifier.getText().toString();

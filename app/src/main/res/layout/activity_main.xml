@@ -25,6 +25,26 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
+
+    <TextView
+        android:id="@+id/label_authentication"
+        android:layout_width="300dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="16dp"
+        android:elegantTextHeight="false"
+        android:fontFamily="@font/roboto_black"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="50sp"
+        app:layout_constraintTop_toBottomOf="@+id/appName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/user_identifier"
+        tools:text="@string/authentication" />
+
     <EditText
         android:id="@+id/user_identifier"
         android:layout_width="300dp"
@@ -42,6 +62,26 @@
         tools:hint="@string/user_hint" />
 
     <Button
+        android:id="@+id/button_authenticate"
+        android:layout_width="300dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="10dp"
+        android:background="#FFFFFF"
+        android:fontFamily="@font/roboto_black"
+        android:onClick="startStopAuthentication"
+        android:text="@string/authenticate_title"
+        android:textAlignment="center"
+        android:textColor="#3D5AFE"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/button_start_stop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_identifier" />
+
+    <Button
         android:id="@+id/button_start_stop"
         android:layout_width="300dp"
         android:layout_height="45dp"
@@ -54,12 +94,12 @@
         android:onClick="startStopRecording"
         android:text="@string/start_title"
         android:textAlignment="center"
-        android:textColor="#3D5AFE"
+        android:textColor="#F3A0E8"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/label_interface_time"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_identifier" />
+        app:layout_constraintTop_toBottomOf="@+id/button_authenticate" />
 
     <TextView
         android:id="@+id/label_interface_time"

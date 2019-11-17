@@ -3,6 +3,7 @@ package com.pjinkim.sensors_data_logger;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -25,7 +27,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
+import com.chaquo.python.android.AndroidPlatform;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -92,6 +96,9 @@ public class MainActivity extends Activity {
     private final int NOTIFICATION_ID = 001;
     private boolean isRecording = false;
 
+    //For Authentication Notification
+    private final int AUTH_NOTIFICATION_ID = 002;
+    private String mDecision = "";
 
     // Android activity lifecycle states
     @Override
@@ -132,18 +139,18 @@ public class MainActivity extends Activity {
         }
         updateConfig();
 
-        // Chaquopy: Starts python
+        //Chaquopy: Starts python;
         //if (! Python.isStarted()) {
-        //  Python.start(new AndroidPlatform(this));
-        //py = Python.getInstance();
+         //   Python.start(new AndroidPlatform(this));
+           // py = Python.getInstance();
         //} else {
-        //    py = Python.getInstance();
+          //  py = Python.getInstance();
         //}
 
         // Test python integration of SVM
-        //float[] accell = {0, 0, 0};
-        //float[] gyro = {0, 0, 0};
-        //float[] magnet = {0, 0, 0};
+        //float[3] accell = {0.0f, 0.0f, 0.0f};
+        //float[3] gyro = {0.0f, 0.0f, 0.0f};
+        //float[3] magnet = {0.0f, 0.0f, 0.0f};
         //int value = validateUserWithSVM(accell, gyro, magnet);
     }
 
@@ -247,16 +254,16 @@ public class MainActivity extends Activity {
      */
     //private int validateUserWithSVM(float[] accell, float[] gyro, float[] magnet) {
     // Get hello.py as test object -- calling
-    // PyObject helloModule = py.getModule("hello");
-    // PyObject svmObject = helloModule.callAttr("SVM");
+        //PyObject helloModule = py.getModule("hello");
+        //PyObject svmObject = helloModule.callAttr("SVM");
+        //int isUser = svmObject.callAttr("returnFive").toInt();
+        //int isUser = svmObject.callAttr("validate_user", accell, gyro, magnet).toInt();
 
-    // int isUser = svmObject.callAttr("returnFive").toInt();
-    // int isUser = svmObject.callAttr("validate_user", accell, gyro, magnet).toInt();
-
-    //return isUser;
+        //return isUser;
     //}
 
     //Dummy user validator until above method works
+    //float[] accell, float gyro, float[] magnet
     private int validateUserWithSVM(){
         final int min = 0;
         final int max = 1;
@@ -400,7 +407,7 @@ public class MainActivity extends Activity {
 
 
         // start each session
-        //mIMUSession.startSession(outputFolder);
+        mIMUSession.startAuthentication();
         mIsRecording.set(true);
         isRecording = true;
         displayAuthenticationNotification();
@@ -422,13 +429,55 @@ public class MainActivity extends Activity {
             public void run() {
 
                 // stop each session
-                //mIMUSession.stopSession();
-                authenticate(validateUserWithSVM());
+                mIMUSession.stopAuthentication();
+
+
+                //LOOK AT ME <----------------------------------------------------------------------------
+                //Here probably want to use getter methods to get the float arrays
+                //These currently have a size of 260
+                float[][] mAcceToFeed = mIMUSession.getAcceToFeed();
+                float[][] mGyroToFeed = mIMUSession.getGyroToFeed();
+                float[][] mMagnetToFeed = mIMUSession.getMagnetToFeed();
+
+                //Use this part in the authenticatewithsvm method once that is working
+                float[] acce;
+                float[] gyro;
+                float[] magne;
+
+                //Test loop to check
+                for (int i = 0; i < 260; i++){
+                    acce = mAcceToFeed[i];
+                    gyro = mGyroToFeed[i];
+                    magne = mMagnetToFeed[i];
+
+                    Log.d("accegyromagne", "i value: " + i);
+                    Log.d("accelength","Lenght: " + acce.length);
+                    Log.d("accevalues", "Acce: X value: " + acce[0] + " Y value: " + acce[1] + " Z value: " + acce[2] );
+
+
+                    Log.d("gyrolength","Lenght: " + acce.length);
+                    Log.d("gyrovalues", "Gyro: X value: " + gyro[0] + " Y value: " + gyro[1] + " Z value: " + gyro[2] );
+
+
+                    Log.d("magnelength","Lenght: " + magne.length);
+                    Log.d("magnevalues", "Magne: X value: " + magne[0] + " Y value: " + magne[1] + " Z value: " + magne[2] );
+                }
+
+                //Here we would pass the array containing float[] arrays to the SVM
+                //Each cell in here is an array that contains a X,Y,Z reading
+                if(mDecision.equals("Authentication")){
+                    authenticate(validateUserWithSVM());
+                    showToast("Authentication stops!");
+                }else if (mDecision.equals("Rejection")){
+                    mLabelAuthenticationResult.setVisibility(View.INVISIBLE);
+                    showToast("Denied authentication attempt.");
+                }
                 mIsRecording.set(false);
                 isRecording = false;
+                mIMUSession.clearArrayList();
 
                 // update screen UI and button
-                showToast("Authentication stops!");
+
                 resetUI();
             }
         });
@@ -559,17 +608,19 @@ public class MainActivity extends Activity {
         Intent stoppingIntent = new Intent(this,MainActivity.class);
         stoppingIntent.putExtra("origin","Recording");
         PendingIntent stoppingPendingIntent = PendingIntent.getActivity(this, 0, stoppingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this,CHANNEL_ID);
+        Notification.Action action = new Notification.Action.Builder(Icon.createWithResource(this,R.drawable.circlestop),"Stop",stoppingPendingIntent).build();
+        Notification.Builder builder = new Notification.Builder(this,CHANNEL_ID);
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentTitle("Hi, " + userName);
+        builder.setContentTitle("Tap the button -------------------------->");
         //Even though our directory naming starts with 0, for subject viewing clarity
         //the session counter will start at 1 for display purposes only.
         builder.setContentText("Recording session #" + (mSessionCounter + 1));
-        builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+        builder.addAction(action);
         builder.setAutoCancel(true);
         builder.setContentIntent(stoppingPendingIntent);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        builder.setStyle (new Notification.MediaStyle().setShowActionsInCompactView (0));
+        builder.setColor(ContextCompat.getColor(this,R.color.colorBlack));
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.notify(NOTIFICATION_ID,builder.build());
     }
 
@@ -581,28 +632,27 @@ public class MainActivity extends Activity {
         //a single click
         Intent authenticatingIntent = new Intent(this,MainActivity.class);
         authenticatingIntent.putExtra("origin", "Authentication");
+        Intent rejectingIntent = new Intent(this, MainActivity.class);
+        rejectingIntent.putExtra("origin", "Rejection");
         PendingIntent authenticatingPendingIntent = PendingIntent.getActivity(this, 1, authenticatingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this,CHANNEL_ID);
+        PendingIntent rejectingPendingIntent = PendingIntent.getActivity(this, 2, rejectingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Notification.Action accept = new Notification.Action.Builder(Icon.createWithResource(this,R.drawable.checkshield),"Accept",authenticatingPendingIntent).build();
+        Notification.Action reject = new Notification.Action.Builder(Icon.createWithResource(this,R.drawable.xbox),"Reject",rejectingPendingIntent).build();
+        Notification.Builder builder = new Notification.Builder(this,CHANNEL_ID);
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentTitle("Hi, phone owner");
+        builder.setContentTitle("Hi, User");
+        builder.addAction(accept);
+        builder.addAction(reject);
         //Even though our directory naming starts with 0, for subject viewing clarity
         //the session counter will start at 1 for display purposes only.
-        builder.setContentText("Click me to authenticate");
-        builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+        builder.setContentText("Authenticate?");
         builder.setAutoCancel(true);
         builder.setContentIntent(authenticatingPendingIntent);
-
+        builder.setStyle (new Notification.MediaStyle().setShowActionsInCompactView (0,1));
+        builder.setColor(ContextCompat.getColor(this,R.color.colorBlack));
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(NOTIFICATION_ID,builder.build());
+        notificationManager.notify(AUTH_NOTIFICATION_ID,builder.build());
     }
-
-
-
-
-
-
-
-
 
 
     //Need to create a NotificationChannel for devices 8.0 and above.
@@ -624,19 +674,31 @@ public class MainActivity extends Activity {
     //current data collection purposes this fits our criteria
     protected void onNewIntent(Intent intent){
         //Extras is used in case the architecture changes and the value is passed before the notification
+
+
         Bundle extras = intent.getExtras();
         String origin;
         Log.d("onNewIntent","Entered onNewIntent");
         if (extras != null){
-            origin = extras.getString("origin");
+            origin = extras.getString("origin","default");
             Log.d("origin","origin value of: " + origin);
             if (origin.equals("Recording")){
+                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                 if(isRecording){
                     Log.d("RecordingOrigin","Entered Recording origin");
                     startStopRecording(mStartStopButton);
+                    notificationManager.cancel(NOTIFICATION_ID);
                 }
             } else if (origin.equals("Authentication")){
+                mDecision = origin;
+                NotificationManager notificationManager1 = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                 startStopAuthentication(mAuthenticationButton);
+                notificationManager1.cancel(AUTH_NOTIFICATION_ID);
+            } else if (origin.equals("Rejection")){
+                mDecision = origin;
+                NotificationManager notificationManager2 = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                startStopAuthentication(mAuthenticationButton);
+                notificationManager2.cancel(AUTH_NOTIFICATION_ID);
             }
         }
     }

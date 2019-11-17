@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.security.Key;
 import java.security.KeyException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -36,6 +37,7 @@ public class IMUSession implements SensorEventListener {
 
     private AtomicBoolean mIsRecording = new AtomicBoolean(false);
     private AtomicBoolean mIsWritingFile = new AtomicBoolean(false);
+    private AtomicBoolean mIsAuthenticating = new AtomicBoolean(false);
 
     private float[] mAcceMeasure = new float[3];
     private float[] mGyroMeasure = new float[3];
@@ -45,6 +47,14 @@ public class IMUSession implements SensorEventListener {
     private float[] mGyroBias = new float[3];
     private float[] mMagnetBias = new float[3];
 
+    private ArrayList<float[]> acceValues = new ArrayList<float[]>();
+    private ArrayList<float[]> gyroValues = new ArrayList<float[]>();
+    private ArrayList<float[]> magneValues = new ArrayList<float[]>();
+
+
+    private float[][] mAcceToFeed;
+    private float[][] mGyroToFeed;
+    private float[][] mMagnetToFeed;
 
     // constructor
     public IMUSession(MainActivity context) {
@@ -115,6 +125,83 @@ public class IMUSession implements SensorEventListener {
         mIsRecording.set(true);
     }
 
+    //Authentication method for user validation
+    //Using our sensor data collected
+    public void startAuthentication(){
+        mFileStreamer = new FileStreamer(mContext);
+        mIsRecording.set(true);
+        mIsAuthenticating.set(true);
+    }
+
+    public void stopAuthentication(){
+        mIsRecording.set(false);
+        Log.d("stopisAuthenticating","Value of boolean: " + mIsAuthenticating.get());
+        if(mIsAuthenticating.get()){
+            //currently initializing array size to 260, but we can change it if necessary
+            mAcceToFeed = new float[260][];
+            mMagnetToFeed = new float[260][];
+            mGyroToFeed = new float[260][];
+
+            //Size difference between ArrayList and defined array to feed to svm
+            //This is a safety measure to assure that the float arrays we pass
+            //to the svm don't contain null values
+            int accedif = acceValues.size() - mAcceToFeed.length ;
+            int magnedif = magneValues.size() - mMagnetToFeed.length;
+            int gyrodif = acceValues.size() - mGyroToFeed.length;
+
+            Log.d("Differences", "accedif " + accedif + " magnedif " + magnedif + " magnedif " + gyrodif);
+
+            for(int i = 0; i < 260; i++){
+
+                if (accedif < 0){
+                    if((i-260) == accedif){
+                        mAcceToFeed[i] = new float[]{0.0f,0.0f,0.0f};
+                        accedif++;
+                    } else {
+                        mAcceToFeed[i] = acceValues.get(i);
+                    }
+                } else{
+                    mAcceToFeed[i] = acceValues.get(i);
+                }
+
+                if (magnedif < 0){
+                    if((i-260) == magnedif){
+                        mMagnetToFeed[i] = new float[]{0.0f,0.0f,0.0f};
+                        magnedif++;
+                    } else {
+                        mMagnetToFeed[i] = magneValues.get(i);
+                    }
+                } else{
+                    mMagnetToFeed[i] = magneValues.get(i);
+                }
+
+                if (gyrodif < 0){
+                    if((i-260) == gyrodif){
+                        mGyroToFeed[i] = new float[]{0.0f,0.0f,0.0f};
+                        gyrodif++;
+                    } else {
+                        mGyroToFeed[i] = gyroValues.get(i);
+                    }
+                } else{
+                    mGyroToFeed[i] = gyroValues.get(i);
+                }
+
+            }
+        }
+        //float[] temp;
+        //for (int i = 0; i < 260; i++){
+        //    temp = mAcceToFeed[i];
+        //    Log.d("mAcceToFeedi", "i value: " + i);
+        //   Log.d("mAcceToFeedlenght","Lenght: " + mAcceToFeed.length);
+        //   Log.d("mAcceToFeed", "X value: " + temp[0] + "Y value: " + temp[1] + "Z value: " + temp[2] );
+
+        //}
+        mIsAuthenticating.set(false);
+        mInitialStepCount = -1;
+        mFileStreamer = null;
+    }
+
+
     public void stopSession() {
 
         mIsRecording.set(false);
@@ -163,6 +250,7 @@ public class IMUSession implements SensorEventListener {
         // set some variables
         float[] values = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
         boolean isFileSaved = (mIsRecording.get() && mIsWritingFile.get());
+        boolean isAuthenticating = (mIsRecording.get() && mIsAuthenticating.get());
 
         // update each sensor measurements
         long timestamp = sensorEvent.timestamp;
@@ -174,7 +262,10 @@ public class IMUSession implements SensorEventListener {
                     mAcceMeasure[1] = sensorEvent.values[1];
                     mAcceMeasure[2] = sensorEvent.values[2];
                     if (isFileSaved) {
+                        Log.d("AccelerometerRecorded", "The acce reading has been recorded");
                         mFileStreamer.addRecord(timestamp, "acce", 3, sensorEvent.values);
+                    }else if (isAuthenticating){
+                        acceValues.add(mFileStreamer.addArray(3, sensorEvent.values));
                     }
                     break;
 
@@ -194,6 +285,8 @@ public class IMUSession implements SensorEventListener {
                     mGyroMeasure[2] = sensorEvent.values[2];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "gyro", 3, sensorEvent.values);
+                    }else if (isAuthenticating){
+                        gyroValues.add(mFileStreamer.addArray(3, sensorEvent.values));
                     }
                     break;
 
@@ -225,6 +318,9 @@ public class IMUSession implements SensorEventListener {
                     mMagnetMeasure[2] = sensorEvent.values[2];
                     if (isFileSaved) {
                         mFileStreamer.addRecord(timestamp, "magnet", 3, sensorEvent.values);
+                    }else if (isAuthenticating){
+                        magneValues.add(mFileStreamer.addArray(3,sensorEvent.values));
+                        Log.d("magneValues", "magneValues size: " + magneValues.size());
                     }
                     break;
 
@@ -283,11 +379,19 @@ public class IMUSession implements SensorEventListener {
 
     }
 
+    public void clearArrayList(){
+        acceValues.clear();
+        magneValues.clear();
+        gyroValues.clear();
+    }
+
 
     // getter and setter
     public boolean isRecording() {
         return mIsRecording.get();
     }
+
+    public boolean isAuthenticating() {return mIsAuthenticating.get();}
 
     public float[] getAcceMeasure() {
         return mAcceMeasure;
@@ -312,4 +416,17 @@ public class IMUSession implements SensorEventListener {
     public float[] getMagnetBias() {
         return mMagnetBias;
     }
+
+    public float[][] getAcceToFeed() {
+        return mAcceToFeed;
+    }
+
+    public float[][] getGyroToFeed() {
+        return mGyroToFeed;
+    }
+
+    public float[][] getMagnetToFeed() {
+        return mMagnetToFeed;
+    }
+
 }

@@ -58,7 +58,7 @@ def parse_data_into_12d_array(accell, gyro, magneto):
     return result
 
 
-# Simple method to calculate the magnitude of x,y,z coordonate
+# Simple method to calculate the magnitude of x,y,z coordinate
 def magnitude(x, y, z):
     return math.sqrt(x * x + y * y + z * z)
 

@@ -30,6 +30,9 @@ public class FileStreamer {
         this.mOutputFolder = mOutputFolder;
     }
 
+    public FileStreamer(Context mContext){
+        this.mContext = mContext;
+    }
 
     // methods
     public void addFile(final String writerId, final String fileName) throws IOException {
@@ -91,6 +94,17 @@ public class FileStreamer {
             }
             stringBuilder.append(" \n");
             writer.write(stringBuilder.toString());
+        }
+    }
+
+    public float[] addArray(final int numValues, final float[] values){
+        synchronized (this) {
+            float[] temp = new float[numValues];
+            for (int i = 0; i < numValues; ++i) {
+                Log.d("numvalue: ", "Numvalue: " + values[i]);
+                temp[i] = values[i];
+            }
+            return temp;
         }
     }
 

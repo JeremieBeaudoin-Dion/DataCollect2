@@ -147,7 +147,7 @@ public class IMUSession implements SensorEventListener {
             //to the svm don't contain null values
             int accedif = acceValues.size() - mAcceToFeed.length ;
             int magnedif = magneValues.size() - mMagnetToFeed.length;
-            int gyrodif = acceValues.size() - mGyroToFeed.length;
+            int gyrodif = gyroValues.size() - mGyroToFeed.length;
 
             Log.d("Differences", "accedif " + accedif + " magnedif " + magnedif + " magnedif " + gyrodif);
 
@@ -181,6 +181,8 @@ public class IMUSession implements SensorEventListener {
                         gyrodif++;
                     } else {
                         mGyroToFeed[i] = gyroValues.get(i);
+                        Log.d("gyroValues.lenght","Gyro length: " + gyroValues.size());
+                        Log.d("gyroValues", "Gyro value["+i+"] = X: " + gyroValues.get(i)[0]+ " Y: " + gyroValues.get(i)[1]+ " Z: " + gyroValues.get(i)[1]);
                     }
                 } else{
                     mGyroToFeed[i] = gyroValues.get(i);

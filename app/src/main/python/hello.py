@@ -37,22 +37,23 @@ def parse_data_into_12d_array(accell, gyro, magneto):
 
     # Assuming data range of 250 lines minimum at 50Hz, which results in 5 seconds of data
     for i in range(LENGTH_OF_VECTOR):
-        ax = float(accell[0][i])
-        ay = float(accell[1][i])
-        az = float(accell[2][i])
+        ax = float(accell[i][0])
+        ay = float(accell[i][1])
+        az = float(accell[i][2])
         am = magnitude(ax, ay, az)
 
-        gx = float(gyro[0][i])
-        gy = float(gyro[1][i])
-        gz = float(gyro[2][i])
+        gx = float(gyro[i][0])
+        gy = float(gyro[i][1])
+        gz = float(gyro[i][2])
         gm = magnitude(gx, gy, gz)
 
-        mx = float(magneto[0][i])
-        my = float(magneto[1][i])
-        mz = float(magneto[2][i])
+        mx = float(magneto[i][0])
+        my = float(magneto[i][1])
+        mz = float(magneto[i][2])
         mm = magnitude(mx, my, mz)
 
         result.append([ax, ay, az, am, gx, gy, gz, gm, mx, my, mz, mm])
+
 
     # closes files
     return result

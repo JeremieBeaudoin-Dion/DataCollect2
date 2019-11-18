@@ -190,14 +190,6 @@ public class IMUSession implements SensorEventListener {
 
             }
         }
-        //float[] temp;
-        //for (int i = 0; i < 260; i++){
-        //    temp = mAcceToFeed[i];
-        //    Log.d("mAcceToFeedi", "i value: " + i);
-        //   Log.d("mAcceToFeedlenght","Lenght: " + mAcceToFeed.length);
-        //   Log.d("mAcceToFeed", "X value: " + temp[0] + "Y value: " + temp[1] + "Z value: " + temp[2] );
-
-        //}
         mIsAuthenticating.set(false);
         mInitialStepCount = -1;
         mFileStreamer = null;

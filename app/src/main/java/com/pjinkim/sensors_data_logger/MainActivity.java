@@ -140,12 +140,12 @@ public class MainActivity extends Activity {
         updateConfig();
 
         //Chaquopy: Starts python;
-        //if (! Python.isStarted()) {
-         //   Python.start(new AndroidPlatform(this));
-           // py = Python.getInstance();
-        //} else {
-          //  py = Python.getInstance();
-        //}
+        if (! Python.isStarted()) {
+            Python.start(new AndroidPlatform(this));
+            py = Python.getInstance();
+        } else {
+            py = Python.getInstance();
+        }
 
         // Test python integration of SVM
         //float[3] accell = {0.0f, 0.0f, 0.0f};
@@ -252,15 +252,28 @@ public class MainActivity extends Activity {
      * output:  0 if this is not user
      *          1 if this is the user
      */
-    //private int validateUserWithSVM(float[] accell, float[] gyro, float[] magnet) {
+    private int validateUserWithSVM(float[][] accell, float[][] gyro, float[][] magnet) {
     // Get hello.py as test object -- calling
-        //PyObject helloModule = py.getModule("hello");
-        //PyObject svmObject = helloModule.callAttr("SVM");
+        PyObject helloModule = py.getModule("hello");
+        PyObject svmObject = helloModule.callAttr("SVM");
         //int isUser = svmObject.callAttr("returnFive").toInt();
-        //int isUser = svmObject.callAttr("validate_user", accell, gyro, magnet).toInt();
+        for (int i = 0; i < 260; i++){
 
-        //return isUser;
-    //}
+            Log.d("svmivalue", "i value: " + i);
+            Log.d("svmaccelength","Lenght: " + accell.length);
+            Log.d("svmaccevalues", "Acce: X value: " + accell[i][0] + " Y value: " + accell[i][1] + " Z value: " + accell[i][2] );
+
+
+            Log.d("svmgyrolength","Lenght: " + gyro.length);
+            Log.d("svmgyrovalues", "Gyro: X value: " + gyro[i][0] + " Y value: " + gyro[i][1] + " Z value: " + gyro[i][2] );
+
+
+            Log.d("svmmagnelength","Lenght: " + magnet.length);
+            Log.d("svmmagnevalues", "Magne: X value: " + magnet[i][0] + " Y value: " + magnet[i][1] + " Z value: " + magnet[i][2] );
+        }
+        int isUser = svmObject.callAttr("validate_user", accell, gyro, magnet).toInt();
+        return isUser;
+    }
 
     //Dummy user validator until above method works
     //float[] accell, float gyro, float[] magnet
@@ -466,7 +479,7 @@ public class MainActivity extends Activity {
                 //Here we would pass the array containing float[] arrays to the SVM
                 //Each cell in here is an array that contains a X,Y,Z reading
                 if(mDecision.equals("Authentication")){
-                    authenticate(validateUserWithSVM());
+                    authenticate(validateUserWithSVM(mAcceToFeed,mGyroToFeed,mMagnetToFeed));
                     showToast("Authentication stops!");
                 }else if (mDecision.equals("Rejection")){
                     mLabelAuthenticationResult.setVisibility(View.INVISIBLE);

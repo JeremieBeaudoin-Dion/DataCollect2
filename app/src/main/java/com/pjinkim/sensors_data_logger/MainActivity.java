@@ -271,6 +271,8 @@ public class MainActivity extends Activity {
             Log.d("svmmagnelength","Lenght: " + magnet.length);
             Log.d("svmmagnevalues", "Magne: X value: " + magnet[i][0] + " Y value: " + magnet[i][1] + " Z value: " + magnet[i][2] );
         }
+
+
         int isUser = svmObject.callAttr("validate_user", accell, gyro, magnet).toInt();
         return isUser;
     }

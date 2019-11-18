@@ -22,10 +22,11 @@ class SVM:
 
     def validate_user(self, accell, gyro, magneto):
         # curr_res = parse_data_into_features(parse_data_into_12d_array(prefix))
+        #There seems to be an error here
         dat = parse_data_into_features(parse_data_into_12d_array(accell, gyro, magneto))
-        feat = parse_data_into_features(dat)
+        #feat = parse_data_into_features(dat)
 
-        prediction = self.model.predict(feat)
+        prediction = self.model.predict([dat])
 
         return int(prediction[0])
 
@@ -54,7 +55,6 @@ def parse_data_into_12d_array(accell, gyro, magneto):
 
         result.append([ax, ay, az, am, gx, gy, gz, gm, mx, my, mz, mm])
 
-
     # closes files
     return result
 
@@ -77,6 +77,16 @@ def parse_data_into_features(results):
         i += len_of_step
     return all_features
 
+def return_arr0(accell, gyro, magneto):
+    dat = parse_data_into_12d_array(accell, gyro, magneto)
+    len_of_window = int(LENGTH_OF_VECTOR/5 + LENGTH_OF_VECTOR/15)
+    len_of_step = int(LENGTH_OF_VECTOR/5)
+    i = 0
+    array = []
+    while i+len_of_window <= len(dat):
+        array.append(len(dat[i:i+len_of_window][0]))
+        i += len_of_step
+    return array
 
 # Creates features from a 2d array
 # returns 1d array of size n * 12
